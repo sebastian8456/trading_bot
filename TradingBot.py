@@ -164,6 +164,7 @@ class TradingBot:
         except IndexError as Error:
             self.write_to_log(error=Error)
             raise Exception(f"Stock {self.ticker.ticker} has no data.")
+
         # Checks if there is a consistent trend
         if "BUY" == results[0] == results[1] == results[2]:
             return "BUY"
