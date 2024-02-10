@@ -13,7 +13,18 @@ import datetime as dt
 class TradingBot:
     """automatic trading bot"""
     symbols = {"BTC/USD": "Bitcoin", 
-               "ETH/USD": "Ethereum"}
+               "ETH/USD": "Ethereum",
+               "LINK/USD": "Link",
+               "USDT/USD": "Tether",
+               "USDC/USD": "U.S. Dollar Coin",
+               "AVAX/USD": "Avalanche"
+               }
+    symbol_minimum = {"BTC/USD": .01,
+                      "ETH/USD": .01,
+                      "LINK/USD": 0.1, 
+                      "USDT/USD": 1, 
+                      "USDC/USD": 1, 
+                      "AVAX/USD": 0.1}
     
     def __init__(self, paper=True):
         """constructor:
@@ -35,7 +46,6 @@ class TradingBot:
         trades = 0
         # Trading algorithm based on MACD and RSI strategies
         while self.trading:
-            self.get_account_info()
             date = dt.datetime.now()
             s_time = date.strftime("%H.%M")
             
@@ -57,6 +67,9 @@ class TradingBot:
     def trade(self):
         """Buys or Sells stock based on RSI and MACD indicators"""
         for symbol in self.symbols:
+                time.time()
+                self.get_account_info()
+                time.time()
                 self.set_ticker(symbol)
                 try:
                     price = self.ticker.history(period="1d").iloc[-1]['Close'] # Get the price
@@ -69,7 +82,7 @@ class TradingBot:
                     if status == "BUY":
                         cash = float(self.acct_info.cash)
                         qty = math.floor(((cash/2)/(price*1.03))*100)/100
-                        if qty < 0.01:
+                        if qty < self.symbol_minimum[symbol]:
                             continue
                         self.order_stock(symbol, quantity=qty, side=OrderSide.BUY)
                     # Sell the stock
