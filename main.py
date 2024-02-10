@@ -1,5 +1,4 @@
 # main.py - runs the main program
-# paper.py loads the paper version
 from TradingBot import TradingBot
 import time
 

@@ -143,8 +143,10 @@ class TradingBot:
     def get_RSI(self):
         """Gets the relative strength index"""
         hist = self.ticker.history(period="max")
+        hist.dropna(inplace=True)
         # Calculate the RSI
-        RSI = ta.rsi(hist['Close'], length=14).tail(3).mean()
+        RSI = ta.rsi(hist['Close'], length=14).iloc[-1]
+
         return RSI # A number 1-100
     
     def get_MACD_status(self):
