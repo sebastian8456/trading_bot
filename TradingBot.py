@@ -35,7 +35,7 @@ class TradingBot:
 
         # set default variables
         self.ticker = None
-        self.is_paper = paper
+        self.is_paper = True
         self.get_secrets()
         self.trading = True
         self.set_trading_client()
@@ -112,7 +112,7 @@ class TradingBot:
         '''initializes the Alpaca trading client'''
         self.trading_client = TradingClient(
                 api_key=self.key, 
-                secret_key=self.secret, 
+                secret_key=self.secret,
                 paper=self.is_paper
                 )
         
@@ -165,27 +165,17 @@ class TradingBot:
 
         # EMA of the MACD line (Signal line)
         MACD_signal_line = MACD_line.ewm(span=signal_period).mean()
-
-        results = []
-        # Get the MACD results of the past 3 days
+        # Get the most recent MACD values
         try:
             # MACD crossing signal line from below indicates BUY
-            for i in range (1,4):
-                if MACD_line.iloc[-i] > MACD_signal_line.iloc[-i]:
-                    results.append("BUY")
-                # MACD crossing signal line from above indicates SELL
-                if MACD_line.iloc[-i] < MACD_signal_line.iloc[-i]:
-                    results.append("SELL")
+            if MACD_line.iloc[-1] > MACD_signal_line.iloc[-1]:
+                return "BUY"
+            # MACD crossing signal line from above indicates SELL
+            if MACD_line.iloc[-1] < MACD_signal_line.iloc[-1]:
+                return "SELL"
         except IndexError as Error:
             self.write_to_log(error=Error)
             raise Exception(f"Stock {self.ticker.ticker} has no data.")
-
-        # Checks if there is a consistent trend
-        if "BUY" == results[0] == results[1] == results[2]:
-            return "BUY"
-        elif "SELL" == results[0] == results[1] == results[2]:
-            return "SELL"
-        return "HOLD"
 
     def analyze_market(self):
         """Checks whether to BUY or SELL
