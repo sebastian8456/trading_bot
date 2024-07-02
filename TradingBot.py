@@ -35,7 +35,10 @@ class TradingBot:
 
         # set default variables
         self.ticker = None
-        self.is_paper = True
+        if paper:
+            self.is_paper = True
+        else:
+            self.is_paper = False
         self.get_secrets()
         self.trading = True
         self.set_trading_client()
@@ -110,11 +113,19 @@ class TradingBot:
 
     def set_trading_client(self):
         '''initializes the Alpaca trading client'''
-        self.trading_client = TradingClient(
-                api_key=self.key, 
-                secret_key=self.secret,
-                paper=self.is_paper
-                )
+        if self.is_paper:
+            # If paper is set to true
+            self.trading_client = TradingClient(
+                    api_key=self.key, 
+                    secret_key=self.secret,
+                    paper=True
+                    )
+        else:
+            # If paper is set to false
+            self.trading_client = TradingClient(
+                    paper=False,
+                    oauth_token=os.getenv("access_token")
+                    )
         
     def get_account_info(self):
         """Gets the user's trading account info"""
@@ -167,10 +178,10 @@ class TradingBot:
         MACD_signal_line = MACD_line.ewm(span=signal_period).mean()
         # Get the most recent MACD values
         try:
-            # MACD crossing signal line from below indicates BUY
+            # MACD crossing above the signal line indicates BUY
             if MACD_line.iloc[-1] > MACD_signal_line.iloc[-1]:
                 return "BUY"
-            # MACD crossing signal line from above indicates SELL
+            # MACD crossing below the signal line indicates SELL
             if MACD_line.iloc[-1] < MACD_signal_line.iloc[-1]:
                 return "SELL"
         except IndexError as Error:
@@ -185,20 +196,26 @@ class TradingBot:
         MACD_status = self.get_MACD_status()
 
         # RSI less than 30 indicates oversold - BUY
-        if RSI < 30 and MACD_status == "BUY":
+        if RSI < 35 and MACD_status == "BUY":
             result = "BUY"
         # RSI greater than 70 indicates overbought - SELL
-        elif RSI > 70 and MACD_status == "SELL":
+        elif RSI > 65 and MACD_status == "SELL":
             result = "SELL"
         return result
     
-    def order_stock(self, symbol, quantity=.01, side=OrderSide.BUY):
+    def order_stock(self, symbol, quantity=.01, side="BUY"):
         """Executes the trade
             Parameters: 
                 quantity - quantity of bitcoin to buy/sell
                 side - OrderSide.BUY or OrderSide.SELL; set to BUY by default
             Returns the market order
         """
+        # set order side
+        if side == "BUY":
+            side = OrderSide.BUY
+        elif side == "SELL":
+            side=OrderSide.SELL
+
         # initialize market order data
         market_order_data = MarketOrderRequest(
                         symbol=symbol,

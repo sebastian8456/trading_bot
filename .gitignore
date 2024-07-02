@@ -1,3 +1,5 @@
 .env
 log.txt
 tests.py
+TradingBotCopy.py
+__pycache__/TradingBot.cpython-311.pyc
