@@ -44,7 +44,7 @@ class TradingBot:
         self.set_trading_client()
 
     def run(self):
-        '''Runs the trading bot to trade cryptocurrency automatically'''
+        '''(Optional) Runs the trading bot to trade cryptocurrency automatically'''
         counter = 0
         trades = 0
         # Trading algorithm based on MACD and RSI strategies
@@ -196,10 +196,10 @@ class TradingBot:
         MACD_status = self.get_MACD_status()
 
         # RSI less than 30 indicates oversold - BUY
-        if RSI < 35 and MACD_status == "BUY":
+        if RSI < 40 and MACD_status == "BUY":
             result = "BUY"
         # RSI greater than 70 indicates overbought - SELL
-        elif RSI > 65 and MACD_status == "SELL":
+        elif RSI > 60 and MACD_status == "SELL":
             result = "SELL"
         return result
     
