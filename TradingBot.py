@@ -49,26 +49,16 @@ class TradingBot:
         trades = 0
         # Trading algorithm based on MACD and RSI strategies
         while self.trading:
-            date = dt.datetime.now()
-            s_time = date.strftime("%H.%M")
-            
-            # Trade at stock market opening
-            if 8.3 <= float(s_time) <= 9.2:
-                pass
-            else:
-                time.sleep(1800) # sleep for 30 minutes
-                continue
-
-            self.trade() # Initiate trades
+            self.trade() # Initiate trading
 
             counter += 1
-            time.sleep(3600) # Wait an hour
-            # Stop the bot after a year if no stocks have been bought
-            if counter >= 365 and trades == 0:
+            time.sleep(120) # Wait 2 minutes
+            # Stop the bot after a while if no trades have been made
+            if counter >= 500 and trades == 0:
                 break
 
     def trade(self):
-        """Buys or Sells stock based on RSI and MACD indicators"""
+        """Buys or Sells cryptocurrency based on RSI and MACD indicators"""
         for symbol in self.symbols:
                 time.time()
                 self.get_account_info()
@@ -83,6 +73,7 @@ class TradingBot:
                 try:
                     # Buy the stock
                     if status == "BUY":
+                        self.write_to_log(info="Attempting to buy " + symbol + ".")
                         cash = float(self.acct_info.cash)
                         qty = math.floor(((cash/2)/(price*1.03))*100)/100
                         if qty < self.symbol_minimum[symbol]:
@@ -90,6 +81,7 @@ class TradingBot:
                         self.order_stock(symbol, quantity=qty, side=OrderSide.BUY)
                     # Sell the stock
                     elif status == "SELL":
+                        self.write_to_log(info="Attempting to sell " + symbol + ".")
                         pos = self.get_position(symbol)
                         if pos == None:
                             continue
@@ -196,10 +188,10 @@ class TradingBot:
         MACD_status = self.get_MACD_status()
 
         # RSI less than 30 indicates oversold - BUY
-        if RSI < 40 and MACD_status == "BUY":
+        if RSI < 30 and MACD_status == "BUY":
             result = "BUY"
         # RSI greater than 70 indicates overbought - SELL
-        elif RSI > 60 and MACD_status == "SELL":
+        elif RSI > 70 and MACD_status == "SELL":
             result = "SELL"
         return result
     
